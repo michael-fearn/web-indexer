@@ -1,0 +1,43 @@
+{
+    "name": "web-indexer",
+    "version": "0.1.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest",
+        "lint": "eslint '*/**/*.{js,ts}' --quiet --fix"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm run lint"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/michael-fearn/web-indexer.git"
+    },
+    "author": "Michael Fearn",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/michael-fearn/web-indexer/issues"
+    },
+    "homepage": "https://github.com/michael-fearn/web-indexer#readme",
+    "dependencies": {
+        "@typegoose/typegoose": "^7.2.0",
+        "mongoose": "^5.9.21"
+    },
+    "devDependencies": {
+        "@types/jest": "^26.0.3",
+        "@types/mongoose": "^5.7.29",
+        "@typescript-eslint/eslint-plugin": "^3.5.0",
+        "@typescript-eslint/parser": "^3.5.0",
+        "eslint": "^7.3.1",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "husky": "^4.2.5",
+        "jest": "^26.1.0",
+        "prettier": "^2.0.5",
+        "ts-jest": "^26.1.1",
+        "typescript": "^3.9.6"
+    }
+}
