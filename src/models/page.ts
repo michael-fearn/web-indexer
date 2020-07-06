@@ -1,6 +1,6 @@
 import { prop, getModelForClass, DocumentType } from '@typegoose/typegoose';
 import { Index } from '../lib';
-import { createLink } from './link';
+import { findOrCreateLink } from '.';
 
 export class Page {
     @prop({ required: true })
@@ -18,7 +18,7 @@ export class Page {
 
 export const PageModel = getModelForClass(Page);
 
-export async function createPage(url: URL, parent: DocumentType<Page> | null) {
+export async function findOrCreatePage(url: URL, parent: DocumentType<Page> | null) {
     let child = await PageModel.findOne({ url: url.href });
 
     if (!child) {
@@ -32,7 +32,7 @@ export async function createPage(url: URL, parent: DocumentType<Page> | null) {
             html: await html,
         });
     }
-    if (parent) createLink(parent, child);
+    if (parent) findOrCreateLink(parent, child);
 
     return child;
 }

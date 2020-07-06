@@ -1,11 +1,11 @@
 import { getQueueSize, addJobs, processAJob } from './models/queue';
-import { createPage } from './models/page';
+import { findOrCreatePage } from './models/page';
 
 (async () => {
     let queueSize = await getQueueSize();
 
     if (queueSize < 1) {
-        const page = await createPage(new URL('https://modcloth.com'), null);
+        const page = await findOrCreatePage(new URL('https://modcloth.com'), null);
         await addJobs(page);
     }
 
@@ -14,8 +14,12 @@ import { createPage } from './models/page';
     const loopLimit = 100;
 
     while (queueSize > 0 && loop < loopLimit) {
-        await Promise.all(new Array(concurrentRequests).fill(undefined).map(processAJob));
+        const promises = await Promise.all(
+            new Array(concurrentRequests).fill(undefined).map(processAJob),
+        );
+        console.log({ promises });
 
         queueSize = await getQueueSize();
     }
+    console.log('finished');
 })();

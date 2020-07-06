@@ -37,7 +37,7 @@ export class Index {
             )
             .then((urls) => {
                 this._urls = urls;
-                return urls;
+                return this._urls;
             });
     }
 
@@ -48,7 +48,7 @@ export class Index {
             .then(($) => $.html())
             .then((html) => {
                 this._html = html.replace(regex.scriptTag, '').replace(regex.styleTag, '');
-                return html;
+                return this._html;
             });
     }
 
@@ -64,7 +64,7 @@ export class Index {
             )
             .then((plainText) => {
                 this._plainText = plainText;
-                return plainText;
+                return this._plainText;
             });
     }
 
@@ -75,7 +75,7 @@ export class Index {
             .then((plainText) => new Trie(plainText))
             .then((trie) => {
                 this._trie = trie;
-                return trie;
+                return this._trie;
             });
     }
 }

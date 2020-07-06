@@ -23,14 +23,12 @@ export class Link {
 
 export const LinkModel = getModelForClass(Link);
 
-export async function createLink(parent: DocumentType<Page>, child: DocumentType<Page>) {
-    const existingLink = await LinkModel.findOne({
-        parentUrlHash: parent.urlHash,
-        childUrlHash: child.urlHash,
-    });
-    if (existingLink) return existingLink;
-
+export async function findOrCreateLink(parent: DocumentType<Page>, child: DocumentType<Page>) {
     const { url: parentUrl, urlHash: parentUrlHash } = parent;
     const { url: childUrl, urlHash: childUrlHash } = child;
+
+    const existingLink = await LinkModel.findOne({ parentUrlHash, childUrlHash });
+    if (existingLink) return existingLink;
+
     return LinkModel.create({ parent, parentUrl, parentUrlHash, child, childUrl, childUrlHash });
 }
