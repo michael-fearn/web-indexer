@@ -1,8 +1,8 @@
-import { TrieTree } from '../../src/lib/trie-tree';
+import { Trie } from '../../src/lib/trie';
 
-describe('TrieTree', () => {
+describe('Trie', () => {
     test('insertion', () => {
-        const trie = new TrieTree();
+        const trie = new Trie();
         trie.insert('Hello');
         expect(trie.contains('H')).toBeFalsy();
         expect(trie.contains('He')).toBeFalsy();
@@ -12,7 +12,7 @@ describe('TrieTree', () => {
     });
 
     test('find', () => {
-        const trie = new TrieTree();
+        const trie = new Trie();
         trie.insert('the');
         trie.insert('that');
         trie.insert('then');
@@ -23,11 +23,27 @@ describe('TrieTree', () => {
 
         const found = trie.find('th');
         const shouldContain = ['the', 'that', 'then', 'they', 'their', "they're"];
+
+        expect(found.every((word) => shouldContain.includes(word))).toBeTruthy();
+    });
+    test('allWords', () => {
+        const trie = new Trie();
+        trie.insert('the');
+        trie.insert('that');
+        trie.insert('then');
+        trie.insert('they');
+        trie.insert('their');
+        trie.insert("they're");
+        trie.insert('train');
+
+        const found = trie.allWords;
+        const shouldContain = ['the', 'that', 'then', 'they', 'their', "they're", 'train'];
+
         expect(found.every((word) => shouldContain.includes(word))).toBeTruthy();
     });
 
     test('contains', () => {
-        const trie = new TrieTree();
+        const trie = new Trie();
         trie.insert('the');
         trie.insert('the');
         trie.insert('that');

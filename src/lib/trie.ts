@@ -27,8 +27,13 @@ class TrieNode {
     }
 }
 
-export class TrieTree {
+export class Trie {
     root = new TrieNode('');
+
+    constructor(bodyOfText?: string) {
+        if (bodyOfText)
+            bodyOfText.split(' ').forEach((word) => this.insert(word.trim().toLowerCase()));
+    }
 
     public insert(word: string): void {
         let node = this.root;
@@ -76,13 +81,17 @@ export class TrieTree {
             node = child;
         }
 
-        return TrieTree.getAllWords(node);
+        return Trie.wordsFromNode(node);
     }
 
-    private static getAllWords(node: TrieNode): string[] {
+    public get allWords(): string[] {
+        return Trie.wordsFromNode(this.root);
+    }
+
+    private static wordsFromNode(node: TrieNode): string[] {
         function iterate(children: { [letter: string]: TrieNode }) {
             return Object.values(children)
-                .map(TrieTree.getAllWords)
+                .map(Trie.wordsFromNode)
                 .flatMap((nested) => nested);
         }
         if (node.end) return [node.word, ...iterate(node.children)];
