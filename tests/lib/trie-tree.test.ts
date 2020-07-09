@@ -1,4 +1,4 @@
-import { Trie } from '../../src/lib/trie';
+import { Trie } from '../../server/lib/trie';
 
 describe('Trie', () => {
     test('insertion', () => {
