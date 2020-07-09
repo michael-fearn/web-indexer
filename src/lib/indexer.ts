@@ -21,7 +21,11 @@ export class Index {
     private _trie: Trie | undefined;
 
     constructor(public url: URL) {
+        // try {
         this.pageData = Axios.get(url.href).then((response) => cheerio.load(response.data));
+        // } catch (err) {
+        //     return undefined;
+        // }
     }
 
     public get urls(): Promise<URL[]> {
@@ -42,7 +46,7 @@ export class Index {
     }
 
     public get html(): Promise<string> {
-        if (this._html) Promise.resolve(this._html);
+        if (this._html) return Promise.resolve(this._html);
 
         return this.pageData
             .then(($) => $.html())
@@ -53,7 +57,7 @@ export class Index {
     }
 
     public get plainText(): Promise<string> {
-        if (this._plainText) Promise.resolve(this._plainText);
+        if (this._plainText) return Promise.resolve(this._plainText);
 
         return this.html
             .then((html) =>
