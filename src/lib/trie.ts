@@ -10,13 +10,13 @@ class TrieNode {
         this.parent = parent || null;
     }
 
-    public addChild(node: TrieNode) {
+    public addChild(node: TrieNode): void {
         this.children[node.key] = node;
     }
 
     get word(): string {
         const output: string[] = [];
-        let node: TrieNode | null = (() => this)();
+        let node: TrieNode | null = ((): this => this)();
 
         while (node !== null) {
             output.unshift(node.key);
@@ -89,7 +89,7 @@ export class Trie {
     }
 
     private static wordsFromNode(node: TrieNode): string[] {
-        function iterate(children: { [letter: string]: TrieNode }) {
+        function iterate(children: { [letter: string]: TrieNode }): string[] {
             return Object.values(children)
                 .map(Trie.wordsFromNode)
                 .flatMap((nested) => nested);

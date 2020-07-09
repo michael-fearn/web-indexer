@@ -1,4 +1,4 @@
-import { prop, Ref, getModelForClass, DocumentType } from '@typegoose/typegoose';
+import { prop, Ref, getModelForClass } from '@typegoose/typegoose';
 import { Page } from './';
 
 export class Link {
@@ -22,15 +22,3 @@ export class Link {
 }
 
 export const LinkModel = getModelForClass(Link);
-
-export async function createLink(parent: DocumentType<Page>, child: DocumentType<Page>) {
-    const existingLink = await LinkModel.findOne({
-        parentUrlHash: parent.urlHash,
-        childUrlHash: child.urlHash,
-    });
-    if (existingLink) return existingLink;
-
-    const { url: parentUrl, urlHash: parentUrlHash } = parent;
-    const { url: childUrl, urlHash: childUrlHash } = child;
-    return LinkModel.create({ parent, parentUrl, parentUrlHash, child, childUrl, childUrlHash });
-}

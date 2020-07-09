@@ -21,7 +21,11 @@ export class Index {
     private _trie: Trie | undefined;
 
     constructor(public url: URL) {
+        // try {
         this.pageData = Axios.get(url.href).then((response) => cheerio.load(response.data));
+        // } catch (err) {
+        //     return undefined;
+        // }
     }
 
     public get urls(): Promise<URL[]> {
@@ -37,23 +41,23 @@ export class Index {
             )
             .then((urls) => {
                 this._urls = urls;
-                return urls;
+                return this._urls;
             });
     }
 
     public get html(): Promise<string> {
-        if (this._html) Promise.resolve(this._html);
+        if (this._html) return Promise.resolve(this._html);
 
         return this.pageData
             .then(($) => $.html())
             .then((html) => {
                 this._html = html.replace(regex.scriptTag, '').replace(regex.styleTag, '');
-                return html;
+                return this._html;
             });
     }
 
     public get plainText(): Promise<string> {
-        if (this._plainText) Promise.resolve(this._plainText);
+        if (this._plainText) return Promise.resolve(this._plainText);
 
         return this.html
             .then((html) =>
@@ -64,7 +68,7 @@ export class Index {
             )
             .then((plainText) => {
                 this._plainText = plainText;
-                return plainText;
+                return this._plainText;
             });
     }
 
@@ -75,7 +79,7 @@ export class Index {
             .then((plainText) => new Trie(plainText))
             .then((trie) => {
                 this._trie = trie;
-                return trie;
+                return this._trie;
             });
     }
 }
