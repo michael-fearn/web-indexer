@@ -1,25 +1,25 @@
-class TrieNode {
-    key: string;
-    parent: TrieNode | null;
+export class Node {
+    letter: string;
+    parent: Node | null;
     end = false;
     occurrences?: number;
-    children: { [letter: string]: TrieNode } = {};
+    children: { [letter: string]: Node } = {};
 
-    constructor(letter: string, parent?: TrieNode) {
-        this.key = letter;
+    constructor(letter: string, parent?: Node) {
+        this.letter = letter;
         this.parent = parent || null;
     }
 
-    public addChild(node: TrieNode): void {
-        this.children[node.key] = node;
+    public addChild(node: Node): void {
+        this.children[node.letter] = node;
     }
 
-    get word(): string {
+    get characters(): string {
         const output: string[] = [];
-        let node: TrieNode | null = ((): this => this)();
+        let node: Node | null = ((): this => this)();
 
         while (node !== null) {
-            output.unshift(node.key);
+            output.unshift(node.letter);
             node = node.parent;
         }
 
@@ -28,7 +28,8 @@ class TrieNode {
 }
 
 export class Trie {
-    root = new TrieNode('');
+    public Node = Node;
+    public root = new Node('');
 
     constructor(bodyOfText?: string) {
         if (bodyOfText)
@@ -41,7 +42,7 @@ export class Trie {
         for (let index = 0; index < word.length; index++) {
             const letter = word[index];
             if (!node.children[letter]) {
-                node.addChild(new TrieNode(letter, node));
+                node.addChild(new Node(letter, node));
             }
             if (index === word.length - 1) {
                 const child = node.children[letter];
@@ -88,13 +89,13 @@ export class Trie {
         return Trie.wordsFromNode(this.root);
     }
 
-    private static wordsFromNode(node: TrieNode): string[] {
-        function iterate(children: { [letter: string]: TrieNode }): string[] {
+    private static wordsFromNode(node: Node): string[] {
+        function iterate(children: { [letter: string]: Node }): string[] {
             return Object.values(children)
                 .map(Trie.wordsFromNode)
                 .flatMap((nested) => nested);
         }
-        if (node.end) return [node.word, ...iterate(node.children)];
+        if (node.end) return [node.characters, ...iterate(node.children)];
         else return iterate(node.children);
     }
 }

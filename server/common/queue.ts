@@ -1,6 +1,7 @@
 import mongoDbQueue from 'mongodb-queue';
-import { Mongoose, mongo } from 'mongoose';
+import { Mongoose } from 'mongoose';
 import { mongoose } from './db';
+
 interface Payload {
     parentId: string;
     url: string;
