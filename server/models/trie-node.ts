@@ -1,8 +1,7 @@
 import { prop, Ref, getModelForClass, DocumentType, mongoose } from '@typegoose/typegoose';
 import { getEmptyDictionary } from './dictionary';
 import { uniq } from 'lodash';
-// import { Trie, Node } from '../lib';
-// import { Word } from './word';
+
 export class TrieNode {
     @prop({ default: false, index: true })
     root!: boolean;
@@ -71,14 +70,13 @@ class TrieNodeUtils {
         );
 
         delete this.nodeRefs;
-        // All the nodes have been made / updated, and have been given references to one another. Save them all at once.
+        // All the nodes have been created / updated, and have been given references to one another. Save them all at once.
         return Promise.all(uniq(trieNodes).map((node) => node.save()));
     };
 
     private async insert(word: string, write = true): Promise<Promise<DocumentType<TrieNode>>[]> {
         const modifiedNodes: Promise<DocumentType<TrieNode>>[] = [];
         function applyWrite(doc: DocumentType<TrieNode>): Promise<DocumentType<TrieNode>> {
-            // modifiedNodes.includes(doc => doc.)
             return write ? doc.save() : Promise.resolve(doc);
         }
 
@@ -118,7 +116,6 @@ class TrieNodeUtils {
             }
             parentNode = childNode;
         }
-        // should never be reached.
         throw new Error(
             'There might be some trouble with the end of word logic on TrieNode.insert.',
         );
