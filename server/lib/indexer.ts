@@ -1,7 +1,6 @@
 import cheerio from 'cheerio';
 import Axios from 'axios';
 import { URL } from 'url';
-import { Trie } from './trie';
 
 const regex = {
     scriptTag: new RegExp(
@@ -10,6 +9,7 @@ const regex = {
     styleTag: new RegExp(/<style((.|\n|\r)*?)<\/style>/gi),
     specialCharacters: new RegExp(/\&(.*?)\;/gi),
     onlyLetters: new RegExp(/[^a-zA-Z ]/gi),
+    spacing: new RegExp(/\s\s+/g),
     elements: new RegExp(/<[^>]*>/gi),
 };
 
@@ -18,14 +18,9 @@ export class Index {
     private _urls: URL[] | undefined;
     private _html: string | undefined;
     private _plainText: string | undefined;
-    private _trie: Trie | undefined;
 
     constructor(public url: URL) {
-        // try {
         this.pageData = Axios.get(url.href).then((response) => cheerio.load(response.data));
-        // } catch (err) {
-        //     return undefined;
-        // }
     }
 
     public get urls(): Promise<URL[]> {
@@ -64,22 +59,13 @@ export class Index {
                 html
                     .replace(regex.elements, '')
                     .replace(regex.specialCharacters, '')
-                    .replace(regex.onlyLetters, ''),
+                    .replace(regex.onlyLetters, '')
+                    .replace(regex.spacing, ' ')
+                    .trim(),
             )
             .then((plainText) => {
                 this._plainText = plainText;
                 return this._plainText;
-            });
-    }
-
-    public get trie(): Promise<Trie> {
-        if (this._trie) Promise.resolve(this._trie);
-
-        return this.plainText
-            .then((plainText) => new Trie(plainText))
-            .then((trie) => {
-                this._trie = trie;
-                return this._trie;
             });
     }
 }

@@ -1,62 +1,34 @@
-import { prop, Ref, getModelForClass, DocumentType, mongoose } from '@typegoose/typegoose';
 import { getEmptyDictionary } from './dictionary';
+import { DocumentType } from '@typegoose/typegoose';
+import { TrieNodeModel, TrieNode } from './index';
 import { uniq } from 'lodash';
 
-export class TrieNode {
-    @prop({ default: false, index: true })
-    root!: boolean;
-
-    @prop({ ref: TrieNode, index: true, default: null })
-    parent?: Ref<TrieNode>;
-
-    @prop({ required: true })
-    children!: { [letter: string]: mongoose.Types.ObjectId | null };
-
-    @prop({ default: 0 })
-    end!: boolean;
-
-    @prop({ default: '' })
-    letter?: string;
-    @prop()
-    occurrences!: number;
-
-    @prop({ default: '', unique: true, index: true })
-    characters?: string;
-
-    public static insertText(text: string): Promise<DocumentType<TrieNode>[]> {
-        text;
-        throw new Error('insertText is meant to be overwritten');
+export class TrieNodeUtils {
+    constructor() {
+        // this method is being attached to the TrieNodeModel.
+        this.insertText = this.insertText.bind(this);
     }
-}
-const TrieNodeModel = getModelForClass(TrieNode);
 
-class TrieNodeUtils {
-    private _root!: DocumentType<TrieNode>;
+    private root!: DocumentType<TrieNode>;
 
     private nodeRefs: { [_id: string]: DocumentType<TrieNode> } = {};
 
-    public get root(): Promise<DocumentType<TrieNode>> {
-        return (async (): Promise<DocumentType<TrieNode>> => {
-            try {
-                if (this._root) return Promise.resolve(this._root);
+    public async setRoot(): Promise<void> {
+        if (!this.root) {
+            let node = await TrieNodeModel.findOne({ root: true });
 
-                let node = await TrieNodeModel.findOne({ root: true });
-                if (!node) {
-                    node = await TrieNodeModel.create({
-                        root: true,
-                        occurrences: 0,
-                        end: false,
-                        children: getEmptyDictionary(),
-                    });
-                }
-                this._root = node;
-                return node;
-            } catch (err) {
-                throw new Error(err);
+            if (!node) {
+                node = new TrieNodeModel({
+                    root: true,
+                    occurrences: 0,
+                    isEnd: false,
+                });
             }
-        })();
+            this.root = node;
+        }
     }
-    public insertText = async (text: string): Promise<DocumentType<TrieNode>[]> => {
+
+    public async insertText(text: string): Promise<DocumentType<TrieNode>[]> {
         const promiseArrayHoldingNestedDocs = [];
         const words = text.split(' ');
         for (const word of words) {
@@ -68,20 +40,39 @@ class TrieNodeUtils {
         const trieNodes = await Promise.all(promiseArrayHoldingNestedDocs).then((arr) =>
             arr.flatMap((val) => val),
         );
-
         delete this.nodeRefs;
         // All the nodes have been created / updated, and have been given references to one another. Save them all at once.
-        return Promise.all(uniq(trieNodes).map((node) => node.save()));
-    };
+        const { newNodes, updatedNodes } = uniq(trieNodes).reduce(
+            (group, doc) => {
+                if (doc.isNew) group.newNodes.push(doc);
+                else group.updatedNodes.push(doc);
+                return group;
+            },
+            {
+                newNodes: [],
+                updatedNodes: [],
+            } as {
+                newNodes: DocumentType<TrieNode>[];
+                updatedNodes: DocumentType<TrieNode>[];
+            },
+        );
+        return [
+            ...(await TrieNodeModel.insertMany(newNodes)),
+            ...(await Promise.all(updatedNodes.map((node) => node.save()))),
+            await this.root.save(),
+        ];
+    }
 
     private async insert(word: string, write = true): Promise<Promise<DocumentType<TrieNode>>[]> {
+        await this.setRoot();
+
         const modifiedNodes: Promise<DocumentType<TrieNode>>[] = [];
         function applyWrite(doc: DocumentType<TrieNode>): Promise<DocumentType<TrieNode>> {
             return write ? doc.save() : Promise.resolve(doc);
         }
 
-        let parentNode = await this.root;
-        modifiedNodes.push(applyWrite(parentNode));
+        let parentNode = this.root;
+
         for (let index = 0; index < word.length; index++) {
             const letter = word[index];
             const isEnd = index === word.length - 1;
@@ -91,8 +82,8 @@ class TrieNodeUtils {
                 childNode = new TrieNodeModel({
                     letter,
                     characters: parentNode.characters + letter,
-                    end: isEnd,
                     occurrences: 0,
+                    parent: parentNode._id,
                     children: getEmptyDictionary(),
                 });
 
@@ -109,20 +100,20 @@ class TrieNodeUtils {
                 if (!childNode)
                     throw new Error("Some how you've looked up a reference that doesn't exit!");
             }
+
             if (isEnd) {
-                childNode.occurrences += 1;
+                const { characters } = childNode;
+                if (characters.length > 1 || characters === 'a' || characters === 'i') {
+                    childNode.isEnd = isEnd;
+                    childNode.occurrences += 1;
+                }
                 if (!childNode.isNew) modifiedNodes.push(applyWrite(childNode));
                 return modifiedNodes;
             }
             parentNode = childNode;
         }
         throw new Error(
-            'There might be some trouble with the end of word logic on TrieNode.insert.',
+            'There might be some trouble with the isEnd of word logic on TrieNode.insert.',
         );
     }
 }
-
-const trieNodeUtils = new TrieNodeUtils();
-TrieNodeModel.insertText = trieNodeUtils.insertText;
-
-export { TrieNodeModel };
