@@ -7,7 +7,7 @@ export class Page {
     @prop({ required: true })
     urlHash!: string;
 
-    @prop({ required: true, items: String })
+    @prop({ required: true, type: String })
     hrefs!: string[];
 
     @prop({ required: true })
