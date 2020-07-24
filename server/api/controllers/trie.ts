@@ -1,12 +1,21 @@
-// import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
+import { queryCharacters } from '../../models/trie-node/queries';
+import { WordOrderModel } from '../../models';
 
-export abstract class TrieController {
-    // queryTrie(req: Request, res: Response, next: NextFunction) {
-    //     const { characters } = req.;
-    //     const {trieNodeId} = req.query
-    //     if (!characters) {
-    //         res.send([]);
-    //     }
-    //     const byChar = characters.trim().split('');
-    // }
+export class TrieController {
+    public static async characters(req: Request, res: Response): Promise<unknown> {
+        let { characters } = req.body;
+        if (!characters) characters = '';
+
+        const completions = await queryCharacters(characters.trim().toLowerCase());
+
+        let predictions;
+        if (completions) {
+            predictions = Promise.all(
+                completions.map((doc) => WordOrderModel.getNextWords(doc.characters)),
+            ).then((nested) => nested.flatMap((predictions) => predictions));
+        }
+
+        return res.jsonp({ completions, predictions });
+    }
 }

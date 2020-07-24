@@ -5,39 +5,56 @@ import './App.css';
 
 function App() {
     const [phrase, setPhrase] = useState('');
+    const [completions, setCompletions] = useState([]);
+    const [url, setUrl] = React.useState('');
 
-    useCallback(
-        (newPhrase: string) => {
-            return Axios.get('localhost:9000');
-        },
-        [phrase],
-    );
+    async function getCompletions(newPhrase: string) {
+        //  = useCallback(
+        // async (newPhrase: string) => {
+        const newCompletions = await Axios.post('http://localhost:4000/query/trie', {
+            characters: Buffer.from(newPhrase).toString('base64'),
+        }).then((res) => res.data);
+        setCompletions((newCompletions || []).map((data: any) => data.characters));
+    }
+    // [phrase],
+    // );
 
     function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
         const newPhrase = event.target.value;
     }
+
+    function submitUrl() {
+        const encodedUrl = Buffer.from(url).toString('base64');
+        Axios.post('http://localhost:4000/index', { url: encodedUrl }).then((res) => {
+            if (res.data === true) {
+                alert(`${url} was indexed successfully.`);
+            }
+        });
+    }
+
     return (
-        // <div className="App">
-        //   <header className="App-header">
-        //     <img src={logo} className="App-logo" alt="logo" />
-        //     <p>
-        //       Edit <code>src/App.tsx</code> and save to reload.
-        //     </p>
-        //     <a
-        //       className="App-link"
-        //       href="https://reactjs.org"
-        //       target="_blank"
-        //       rel="noopener noreferrer"
-        //     >
-        //       Learn React
-        //     </a>
-        //   </header>
-        // </div>
         <div>
+            <input
+                type="text"
+                name="url"
+                id="url"
+                placeholder="url"
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+            />
+            <button onClick={() => submitUrl()}>Submit</button>
             <h1>graph</h1>
 
             <label htmlFor="word-searh">Keywords:</label>
-            <input type="text" name="word-search" onChange={(event) => {}} id="word-search" />
+            <input
+                type="text"
+                name="word-search"
+                onChange={(event) => {
+                    getCompletions(event.target.value);
+                }}
+                id="word-search"
+            />
+            {JSON.stringify(completions, null, 2)}
         </div>
     );
 }

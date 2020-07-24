@@ -57,14 +57,14 @@ export class Index {
         return this.html
             .then((html) =>
                 html
-                    .replace(regex.elements, '')
-                    .replace(regex.specialCharacters, '')
-                    .replace(regex.onlyLetters, '')
+                    .replace(regex.elements, ' ')
+                    .replace(regex.specialCharacters, ' ')
+                    .replace(regex.onlyLetters, ' ')
                     .replace(regex.spacing, ' ')
                     .trim(),
             )
             .then((plainText) => {
-                this._plainText = plainText;
+                this._plainText = plainText.toLowerCase();
                 return this._plainText;
             });
     }

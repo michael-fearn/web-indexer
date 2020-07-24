@@ -22,6 +22,7 @@ export class TrieNodeUtils {
                     root: true,
                     occurrences: 0,
                     isEnd: false,
+                    children: getEmptyDictionary(),
                 });
             }
             this.root = node;
@@ -40,7 +41,7 @@ export class TrieNodeUtils {
         const trieNodes = await Promise.all(promiseArrayHoldingNestedDocs).then((arr) =>
             arr.flatMap((val) => val),
         );
-        delete this.nodeRefs;
+
         // All the nodes have been created / updated, and have been given references to one another. Save them all at once.
         const { newNodes, updatedNodes } = uniq(trieNodes).reduce(
             (group, doc) => {
@@ -56,11 +57,13 @@ export class TrieNodeUtils {
                 updatedNodes: DocumentType<TrieNode>[];
             },
         );
-        return [
+        const docs = [
             ...(await TrieNodeModel.insertMany(newNodes)),
             ...(await Promise.all(updatedNodes.map((node) => node.save()))),
             await this.root.save(),
         ];
+        delete this.nodeRefs;
+        return docs;
     }
 
     private async insert(word: string, write = true): Promise<Promise<DocumentType<TrieNode>>[]> {
@@ -92,7 +95,8 @@ export class TrieNodeUtils {
 
                 modifiedNodes.push(applyWrite(childNode));
             } else {
-                childNode = this.nodeRefs[parentNode.children[letter]?.toHexString() || ''];
+                const ref = parentNode.children[letter]?.toHexString() || '';
+                childNode = this.nodeRefs[ref];
                 if (!childNode) {
                     childNode = await TrieNodeModel.findOne({ _id: parentNode.children[letter] });
                     if (childNode) this.nodeRefs[childNode._id.toHexString()] = childNode;

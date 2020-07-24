@@ -1,7 +1,11 @@
 import { TrieNode, TrieNodeModel } from '.';
+import { DocumentType } from '@typegoose/typegoose';
 
-export async function queryCharacters(characters: string): Promise<TrieNode[]> {
-    return TrieNodeModel.aggregate<TrieNode>(
+export async function queryCharacters(
+    characters: string,
+    limit = 5,
+): Promise<DocumentType<TrieNode>[] | void> {
+    return TrieNodeModel.aggregate(
         [
             {
                 $match: {
@@ -37,12 +41,17 @@ export async function queryCharacters(characters: string): Promise<TrieNode[]> {
                 },
             },
             {
+                $addFields: {
+                    children: '$$REMOVE',
+                },
+            },
+            {
                 $sort: {
                     occurrences: -1,
                 },
             },
             {
-                $limit: 15,
+                $limit: limit,
             },
         ],
         // eslint-disable-next-line
