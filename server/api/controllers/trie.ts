@@ -9,13 +9,15 @@ export class TrieController {
 
         const completions = await queryCharacters(characters.trim().toLowerCase());
 
-        let predictions;
-        if (completions) {
-            predictions = Promise.all(
-                completions.map((doc) => WordOrderModel.getNextWords(doc.characters)),
-            ).then((nested) => nested.flatMap((predictions) => predictions));
-        }
+        const completionsWithPredictions = await Promise.all(
+            completions.map((doc) =>
+                WordOrderModel.getNextWords(doc.characters).then((predictions) => ({
+                    ...doc,
+                    predictions,
+                })),
+            ),
+        );
 
-        return res.jsonp({ completions, predictions });
+        return res.jsonp({ completionsWithPredictions });
     }
 }

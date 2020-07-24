@@ -1,7 +1,7 @@
 import { WordOrderModel, WordOrder } from '.';
 import { DocumentType } from '@typegoose/typegoose';
 
-export function getNextWords(word: string, count = 5): Promise<DocumentType<WordOrder>[]> {
+export function getNextWords(word: string, limit = 1): Promise<DocumentType<WordOrder>[]> {
     return WordOrderModel.aggregate(
         [
             {
@@ -43,7 +43,7 @@ export function getNextWords(word: string, count = 5): Promise<DocumentType<Word
                 },
             },
             {
-                $limit: count,
+                $limit: limit,
             },
         ],
         // eslint-disable-next-line

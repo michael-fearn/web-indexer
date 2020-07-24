@@ -4,7 +4,7 @@ import { DocumentType } from '@typegoose/typegoose';
 export async function queryCharacters(
     characters: string,
     limit = 5,
-): Promise<DocumentType<TrieNode>[] | void> {
+): Promise<DocumentType<TrieNode>[]> {
     return TrieNodeModel.aggregate(
         [
             {
