@@ -9,15 +9,22 @@ function App() {
     const [url, setUrl] = React.useState('');
 
     async function getCompletions(newPhrase: string) {
-        //  = useCallback(
-        // async (newPhrase: string) => {
-        const newCompletions = await Axios.post('http://localhost:4000/query/trie', {
-            characters: Buffer.from(newPhrase).toString('base64'),
-        }).then((res) => res.data);
-        setCompletions((newCompletions || []).map((data: any) => data.characters));
+        const { completionsWithPredictions } = await Axios.post(
+            'http://localhost:4000/query/trie',
+            {
+                characters: newPhrase, // Buffer.from(newPhrase).toString('base64'),
+            },
+        ).then((res) => res.data);
+        setCompletions(
+            (completionsWithPredictions || [])
+                .map((data: any) => {
+                    return data.predictions.map((prediction: { toWord: any }) => {
+                        return `${data.characters} ${prediction.toWord}`;
+                    });
+                })
+                .flatMap((val: any) => val),
+        );
     }
-    // [phrase],
-    // );
 
     function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
         const newPhrase = event.target.value;

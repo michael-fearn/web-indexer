@@ -9,8 +9,8 @@ const regex = {
     styleTag: new RegExp(/<style((.|\n|\r)*?)<\/style>/gi),
     specialCharacters: new RegExp(/\&(.*?)\;/gi),
     onlyLetters: new RegExp(/[^a-zA-Z ]/gi),
-    spacing: new RegExp(/\s\s+/g),
     elements: new RegExp(/<[^>]*>/gi),
+    spacing: new RegExp(/\s\s+/g),
 };
 
 export class Index {

@@ -1,83 +1,46 @@
-import { prop, Ref, getModelForClass, DocumentType } from '@typegoose/typegoose';
-import { Page } from '..';
+import {
+    prop,
+    Ref,
+    getModelForClass,
+    DocumentType,
+    Severity,
+    modelOptions,
+} from '@typegoose/typegoose';
+import { Page } from '../';
+import { TrieNode } from '../trie-node';
+import { insertText } from './mutations';
 import { getNextWords } from './queries';
-import { TrieNode, TrieNodeModel } from '../trie-node';
 
+@modelOptions({ options: { allowMixed: Severity.ALLOW } })
 export class WordOrder {
-    @prop({ required: true, index: true, ref: Page })
+    @prop({ index: true, ref: Page })
     page!: Ref<Page>;
 
-    @prop({ required: true, index: true })
-    fromWord!: string;
+    @prop({ default: null, index: true })
+    previousWord!: string | null;
 
-    @prop({ required: true, index: true })
-    toWord!: string;
+    @prop({ default: null, index: true })
+    nextWord!: string | null;
 
-    @prop({ required: true, ref: TrieNode })
-    from!: Ref<TrieNode>;
+    @prop({ default: null, ref: TrieNode })
+    previousTrieNode!: Ref<TrieNode> | null;
 
-    @prop({ required: true, ref: TrieNode })
-    to!: Ref<TrieNode>;
+    @prop({ default: null, ref: TrieNode })
+    nextTrieNode!: Ref<TrieNode> | null;
 
-    @prop({ default: 1 })
-    occurrences!: number;
+    @prop({ default: null, ref: WordOrder })
+    previousWordOrder!: Ref<WordOrder> | null;
 
-    public static insertText(text: string, page: DocumentType<Page>): Promise<void> {
-        text;
-        page;
-        throw new Error('insertText is meant to be overwritten');
+    @prop({ default: null, ref: WordOrder })
+    nextWordOrder!: Ref<WordOrder> | null;
+
+    public static async insertText(text: string, page: DocumentType<Page>): Promise<void> {
+        return insertText(text, page);
     }
 
-    public static getNextWords(word: string, count = 5): Promise<DocumentType<WordOrder>[]> {
-        word;
-        count;
-        throw new Error('getNextWords is meant to be overwritten');
-    }
-}
-
-const WordOrderModel = getModelForClass(WordOrder);
-
-async function insertText(text: string, page: DocumentType<Page>): Promise<void> {
-    const words = text.trim().split(' ');
-    let wordCount = Number(words.length);
-
-    let toWord = words.pop();
-    let fromWord = words.pop();
-
-    wordCount = wordCount - 2;
-
-    let inserts = [];
-
-    while (wordCount > 0) {
-        const [from, to] = await Promise.all([
-            TrieNodeModel.findOne({ characters: fromWord }),
-            TrieNodeModel.findOne({ characters: toWord }),
-        ]);
-
-        if (!from || !to) {
-            throw new Error("couldn't find words.");
-        }
-
-        const wordOrder = new WordOrderModel({ page, fromWord, toWord, from, to });
-        inserts.push(wordOrder);
-
-        if (inserts.length === 15000) {
-            await WordOrderModel.insertMany(inserts);
-            inserts = [];
-            console.info(`Words remaining: ${wordCount}`);
-        }
-
-        toWord = fromWord;
-        fromWord = words.pop();
-        wordCount = wordCount - 1;
-    }
-
-    if (inserts.length) {
-        WordOrderModel.insertMany(inserts);
+    public static getNextWords(word: string, limit = 5): Promise<DocumentType<WordOrder>[]> {
+        return getNextWords(word, limit);
     }
 }
 
-WordOrderModel.insertText = insertText;
-WordOrderModel.getNextWords = getNextWords;
-
-export { WordOrderModel };
+export const WordOrderModel = getModelForClass(WordOrder);

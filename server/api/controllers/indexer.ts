@@ -4,10 +4,10 @@ import { WordOrderModel, PageModel } from '../../models';
 
 export class IndexerController {
     public static async indexUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { url: encodedUrl } = req.body;
-        if (typeof encodedUrl !== 'string') throw new Error('url must be string;');
+        const { url: rawUrl } = req.body;
+        // if (typeof encodedUrl !== 'string') throw new Error('url must be string;');
 
-        const rawUrl = new Buffer(encodedUrl, 'base64').toString('ascii');
+        // const rawUrl = new Buffer(encodedUrl, 'base64').toString('ascii');
         try {
             const url = new URL(rawUrl);
 
@@ -16,7 +16,7 @@ export class IndexerController {
                 const index = new Index(url);
 
                 const page = await PageModel.updateOrInsert(index.url.href);
-
+                // await TrieNodeModel.insertText(await index.plainText);
                 await WordOrderModel.insertText(await index.plainText, page);
                 res.send('Successfully indexed.');
             } else {

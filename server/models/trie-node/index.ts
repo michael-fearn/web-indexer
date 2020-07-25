@@ -1,6 +1,15 @@
-import { prop, Ref, getModelForClass, DocumentType, mongoose } from '@typegoose/typegoose';
+import {
+    prop,
+    Ref,
+    getModelForClass,
+    DocumentType,
+    mongoose,
+    modelOptions,
+    Severity,
+} from '@typegoose/typegoose';
 import { TrieNodeUtils } from './utils';
 
+@modelOptions({ options: { allowMixed: Severity.ALLOW } }) // for the children
 export class TrieNode {
     @prop({ default: false, index: true })
     root!: boolean;
