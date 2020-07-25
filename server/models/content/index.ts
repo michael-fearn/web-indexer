@@ -6,13 +6,13 @@ import {
     Severity,
     modelOptions,
 } from '@typegoose/typegoose';
-import { Page } from '../';
-import { TrieNode } from '../trie-node';
+import { Page } from '..';
+import { Word } from '../word';
 import { insertText } from './mutations';
 import { getNextWords } from './queries';
 
 @modelOptions({ options: { allowMixed: Severity.ALLOW } })
-export class WordOrder {
+export class Content {
     @prop({ index: true, ref: Page })
     page!: Ref<Page>;
 
@@ -22,25 +22,25 @@ export class WordOrder {
     @prop({ default: null, index: true })
     nextWord!: string | null;
 
-    @prop({ default: null, ref: TrieNode })
-    previousTrieNode!: Ref<TrieNode> | null;
+    @prop({ default: null, ref: Word })
+    previousWord!: Ref<Word> | null;
 
-    @prop({ default: null, ref: TrieNode })
-    nextTrieNode!: Ref<TrieNode> | null;
+    @prop({ default: null, ref: Word })
+    nextWord!: Ref<Word> | null;
 
-    @prop({ default: null, ref: WordOrder })
-    previousWordOrder!: Ref<WordOrder> | null;
+    @prop({ default: null, ref: Content })
+    previousContent!: Ref<Content> | null;
 
-    @prop({ default: null, ref: WordOrder })
-    nextWordOrder!: Ref<WordOrder> | null;
+    @prop({ default: null, ref: Content })
+    nextContent!: Ref<Content> | null;
 
     public static async insertText(text: string, page: DocumentType<Page>): Promise<void> {
         return insertText(text, page);
     }
 
-    public static getNextWords(word: string, limit = 5): Promise<DocumentType<WordOrder>[]> {
+    public static getNextWords(word: string, limit = 5): Promise<DocumentType<Content>[]> {
         return getNextWords(word, limit);
     }
 }
 
-export const WordOrderModel = getModelForClass(WordOrder);
+export const ContentModel = getModelForClass(Content);

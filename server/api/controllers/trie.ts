@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { queryCharacters } from '../../models/trie-node/queries';
-import { WordOrderModel } from '../../models';
+import { queryCharacters } from '../../models/word/queries';
+import { ContentModel } from '../../models';
 
 export class TrieController {
     public static async characters(req: Request, res: Response): Promise<unknown> {
@@ -11,7 +11,7 @@ export class TrieController {
 
         const completionsWithPredictions = await Promise.all(
             completions.map((doc) =>
-                WordOrderModel.getNextWords(doc.characters).then((predictions) => ({
+                ContentModel.getNextWords(doc.characters).then((predictions) => ({
                     ...doc,
                     predictions,
                 })),

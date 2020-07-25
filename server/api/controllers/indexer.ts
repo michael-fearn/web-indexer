@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Index } from '../../lib';
-import { WordOrderModel, PageModel } from '../../models';
+import { ContentModel, PageModel } from '../../models';
 
 export class IndexerController {
     public static async indexUrl(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -16,8 +16,8 @@ export class IndexerController {
                 const index = new Index(url);
 
                 const page = await PageModel.updateOrInsert(index.url.href);
-                // await TrieNodeModel.insertText(await index.plainText);
-                await WordOrderModel.insertText(await index.plainText, page);
+                // await WordModel.insertText(await index.plainText);
+                await ContentModel.insertText(await index.plainText, page);
                 res.send('Successfully indexed.');
             } else {
                 res.send('Url already indexed.');

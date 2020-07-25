@@ -1,8 +1,8 @@
-import { WordOrderModel, WordOrder } from '.';
+import { ContentModel, Content } from '.';
 import { DocumentType } from '@typegoose/typegoose';
 
-export function getNextWords(word: string, limit = 1): Promise<DocumentType<WordOrder>[]> {
-    return WordOrderModel.aggregate(
+export function getNextWords(word: string, limit = 1): Promise<DocumentType<Content>[]> {
+    return ContentModel.aggregate(
         [
             {
                 $match: {

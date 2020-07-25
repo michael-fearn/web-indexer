@@ -1,11 +1,11 @@
-import { TrieNode, TrieNodeModel } from '.';
+import { Word, WordModel } from '.';
 import { DocumentType } from '@typegoose/typegoose';
 
 export async function queryCharacters(
     characters: string,
     limit = 5,
-): Promise<DocumentType<TrieNode>[]> {
-    return TrieNodeModel.aggregate(
+): Promise<DocumentType<Word>[]> {
+    return WordModel.aggregate(
         [
             {
                 $match: {
@@ -14,7 +14,7 @@ export async function queryCharacters(
             },
             {
                 $graphLookup: {
-                    from: 'trienodes',
+                    from: 'Words',
                     startWith: '$_id',
                     connectFromField: '_id',
                     connectToField: 'parent',

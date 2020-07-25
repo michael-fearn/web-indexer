@@ -7,15 +7,15 @@ import {
     modelOptions,
     Severity,
 } from '@typegoose/typegoose';
-import { TrieNodeUtils } from './utils';
+import { WordInsert } from './mutations';
 
 @modelOptions({ options: { allowMixed: Severity.ALLOW } }) // for the children
-export class TrieNode {
+export class Word {
     @prop({ default: false, index: true })
     root!: boolean;
 
-    @prop({ ref: TrieNode, index: true, default: null })
-    parent?: Ref<TrieNode>;
+    @prop({ ref: Word, index: true, default: null })
+    parent?: Ref<Word>;
 
     @prop({ required: true })
     children!: { [letter: string]: mongoose.Types.ObjectId };
@@ -32,14 +32,9 @@ export class TrieNode {
     @prop({ default: '', unique: true, index: true })
     characters!: string;
 
-    public static insertText(text: string): Promise<DocumentType<TrieNode>[]> {
-        text;
-        throw new Error('insertText is meant to be overwritten');
+    public static insertText(text: string): Promise<DocumentType<Word>[]> {
+        return new WordInsert().insertText(text);
     }
 }
-const TrieNodeModel = getModelForClass(TrieNode);
 
-const trieNodeUtils = new TrieNodeUtils();
-TrieNodeModel.insertText = trieNodeUtils.insertText;
-
-export { TrieNodeModel };
+export const WordModel = getModelForClass(Word);
