@@ -23,10 +23,10 @@ export class Content {
     nextWord!: string | null;
 
     @prop({ default: null, ref: Word })
-    previousWord!: Ref<Word> | null;
+    previousWordNode!: Ref<Word> | null;
 
     @prop({ default: null, ref: Word })
-    nextWord!: Ref<Word> | null;
+    nextWorNdNode!: Ref<Word> | null;
 
     @prop({ default: null, ref: Content })
     previousContent!: Ref<Content> | null;
